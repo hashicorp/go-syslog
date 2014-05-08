@@ -1,4 +1,5 @@
-// +build linux darwin
+// +build linux darwin freebsd openbsd
+
 package gsyslog
 
 import (

@@ -1,4 +1,5 @@
 // +build windows plan9
+
 package gsyslog
 
 import (
