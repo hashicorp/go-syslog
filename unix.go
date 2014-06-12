@@ -11,7 +11,7 @@ import (
 // builtinLogger wraps the Golang implementation of a
 // syslog.Writer to provide the Syslogger interface
 type builtinLogger struct {
-	*syslog.Writer
+	*builtinWriter
 }
 
 // NewLogger is used to construct a new Syslogger
@@ -21,7 +21,7 @@ func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 		return nil, err
 	}
 	priority := syslog.Priority(p) | fPriority
-	l, err := syslog.New(priority, tag)
+	l, err := newBuiltin(priority, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -30,26 +30,29 @@ func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 
 // WriteLevel writes out a message at the given priority
 func (b *builtinLogger) WriteLevel(p Priority, buf []byte) error {
+	var err error
+	m := string(buf)
 	switch p {
 	case LOG_EMERG:
-		return b.Emerg(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_EMERG, m)
 	case LOG_ALERT:
-		return b.Alert(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_ALERT, m)
 	case LOG_CRIT:
-		return b.Crit(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_CRIT, m)
 	case LOG_ERR:
-		return b.Err(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_ERR, m)
 	case LOG_WARNING:
-		return b.Warning(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_WARNING, m)
 	case LOG_NOTICE:
-		return b.Notice(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_NOTICE, m)
 	case LOG_INFO:
-		return b.Info(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_INFO, m)
 	case LOG_DEBUG:
-		return b.Debug(string(buf))
+		_, err = b.writeAndRetry(syslog.LOG_DEBUG, m)
 	default:
-		return fmt.Errorf("Unknown priority: %v", p)
+		err = fmt.Errorf("Unknown priority: %v", p)
 	}
+	return err
 }
 
 // facilityPriority converts a facility string into
