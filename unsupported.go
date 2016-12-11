@@ -10,3 +10,7 @@ import (
 func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 	return nil, fmt.Errorf("Platform does not support syslog")
 }
+
+func DialLogger(network, raddr string, p Priority, facility, tag string) (Syslogger, error) {
+	return nil, fmt.Errorf("Platform does not support syslog")
+}
