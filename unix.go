@@ -1,4 +1,4 @@
-// +build linux darwin dragonfly freebsd netbsd openbsd solaris
+// +build linux darwin dragonfly freebsd hurd netbsd openbsd solaris
 
 package gsyslog
 
