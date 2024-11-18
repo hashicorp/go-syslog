@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MIT
+
 // +build linux darwin dragonfly freebsd netbsd openbsd solaris
 
 package gsyslog
