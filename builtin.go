@@ -5,6 +5,7 @@
 // However, there is a bug with overwhelming syslog that causes writes
 // to block indefinitely. This is fixed by adding a write deadline.
 //
+//go:build !windows && !nacl && !plan9
 // +build !windows,!nacl,!plan9
 
 package gsyslog
@@ -180,14 +181,18 @@ func (n *netConn) writeString(p syslog.Priority, hostname, tag, msg, nl string) 
 		//	1. Use time.Stamp instead of time.RFC3339.
 		//	2. Drop the hostname field from the Fprintf.
 		timestamp := time.Now().Format(time.Stamp)
-		n.conn.SetWriteDeadline(time.Now().Add(localDeadline))
+		if err := n.conn.SetWriteDeadline(time.Now().Add(localDeadline)); err != nil {
+			return fmt.Errorf("failed to set write deadline: %w", err)
+		}
 		_, err := fmt.Fprintf(n.conn, "<%d>%s %s[%d]: %s%s",
 			p, timestamp,
 			tag, os.Getpid(), msg, nl)
 		return err
 	}
 	timestamp := time.Now().Format(time.RFC3339)
-	n.conn.SetWriteDeadline(time.Now().Add(remoteDeadline))
+	if err := n.conn.SetWriteDeadline(time.Now().Add(remoteDeadline)); err != nil {
+		return fmt.Errorf("failed to set write deadline: %w", err)
+	}
 	_, err := fmt.Fprintf(n.conn, "<%d>%s %s %s[%d]: %s%s",
 		p, timestamp, hostname,
 		tag, os.Getpid(), msg, nl)
