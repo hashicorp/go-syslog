@@ -1,30 +1,34 @@
 name: Build and Test Workflow
 
 on:
-    pull_request:
-        branches: [ "master" ]
+  pull_request:
+    branches: ["master"]
+  push:
+    branches: ["master"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-            - name: Setup Go
-              uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
-              with:
-                go-version: '1.23'
-            - name: Run golangci-lint
-              uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5
-            - name: Run test and generate reports
-              run: go test -v ./... -coverprofile=coverage.out
-            - name: Upload Coverage Test
-              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-              with:
-                name: Coverage-report
-                path: coverage.out
-            - name: Display the report
-              run: go tool cover -func=coverage.out
-            - name: Build Go
-              run: go build ./...
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["oldstable", "stable"]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Setup Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
+      - name: Run test and generate reports
+        run: go test -v -race ./... -coverprofile=coverage.out
+      - name: Upload Coverage Test
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: Coverage-report
+          path: coverage.out
+      - name: Display the report
+        run: go tool cover -func=coverage.out
+      - name: Build Go
+        run: go build ./...
