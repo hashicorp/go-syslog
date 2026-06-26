@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2014, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MIT
 
 // +build linux darwin dragonfly freebsd netbsd openbsd solaris
@@ -70,7 +70,7 @@ func (b *builtinLogger) WriteLevel(p Priority, buf []byte) error {
 	case LOG_DEBUG:
 		_, err = b.writeAndRetry(syslog.LOG_DEBUG, m)
 	default:
-		err = fmt.Errorf("Unknown priority: %v", p)
+		err = fmt.Errorf("Unknown priority: %v", p) //nolint: staticcheck
 	}
 	return err
 }
