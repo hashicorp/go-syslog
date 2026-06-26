@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2014, 2025
+// Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MIT
 
 // This file is taken from the log/syslog in the standard lib.
@@ -6,7 +6,6 @@
 // to block indefinitely. This is fixed by adding a write deadline.
 //
 //go:build !windows && !nacl && !plan9
-// +build !windows,!nacl,!plan9
 
 package gsyslog
 
@@ -99,7 +98,7 @@ func dialBuiltin(network, raddr string, priority syslog.Priority, tag string) (*
 func (w *builtinWriter) connect() (err error) {
 	if w.conn != nil {
 		// ignore err from close, it makes sense to continue anyway
-		w.conn.close()
+		_ = w.conn.close()
 		w.conn = nil
 	}
 
@@ -218,5 +217,5 @@ func unixSyslog() (conn serverConn, err error) {
 			}
 		}
 	}
-	return nil, errors.New("Unix syslog delivery error")
+	return nil, errors.New("Unix syslog delivery error") //nolint: staticcheck
 }
