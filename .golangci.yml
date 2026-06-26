@@ -7,4 +7,3 @@ linters:
     - errcheck
     - modernize
     - staticcheck
-output_format: colored-line-number
