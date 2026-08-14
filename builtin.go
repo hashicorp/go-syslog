@@ -33,8 +33,9 @@ type builtinWriter struct {
 	network  string
 	raddr    string
 
-	mu   sync.Mutex // guards conn
-	conn serverConn
+	mu      sync.Mutex // guards conn
+	conn    serverConn
+	timeout time.Duration
 }
 
 // This interface and the separate syslog_unix.go file exist for
@@ -57,7 +58,7 @@ type netConn struct {
 // write to the returned writer sends a log message with the given
 // priority and prefix.
 func newBuiltin(priority syslog.Priority, tag string) (w *builtinWriter, err error) {
-	return dialBuiltin("", "", priority, tag)
+	return dialBuiltin("", "", priority, tag, 0)
 }
 
 // Dial establishes a connection to a log daemon by connecting to
@@ -65,7 +66,7 @@ func newBuiltin(priority syslog.Priority, tag string) (w *builtinWriter, err err
 // writer sends a log message with the given facility, severity and
 // tag.
 // If network is empty, Dial will connect to the local syslog server.
-func dialBuiltin(network, raddr string, priority syslog.Priority, tag string) (*builtinWriter, error) {
+func dialBuiltin(network, raddr string, priority syslog.Priority, tag string, timeout time.Duration) (*builtinWriter, error) {
 	if priority < 0 || priority > syslog.LOG_LOCAL7|syslog.LOG_DEBUG {
 		return nil, errors.New("log/syslog: invalid priority")
 	}
@@ -81,6 +82,7 @@ func dialBuiltin(network, raddr string, priority syslog.Priority, tag string) (*
 		hostname: hostname,
 		network:  network,
 		raddr:    raddr,
+		timeout:  timeout,
 	}
 
 	w.mu.Lock()
@@ -109,7 +111,11 @@ func (w *builtinWriter) connect() (err error) {
 		}
 	} else {
 		var c net.Conn
-		c, err = net.DialTimeout(w.network, w.raddr, remoteDeadline)
+		deadline := w.timeout
+		if deadline == 0 {
+			deadline = remoteDeadline
+		}
+		c, err = net.DialTimeout(w.network, w.raddr, deadline)
 		if err == nil {
 			w.conn = &netConn{conn: c}
 			if w.hostname == "" {
