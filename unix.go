@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log/syslog"
 	"strings"
-	"time"
 )
 
 // builtinLogger wraps the Golang implementation of a
@@ -34,12 +33,11 @@ func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 
 // DialLogger is used to construct a new Syslogger that establishes connection to remote syslog server
 func DialLogger(network, raddr string, p Priority, facility, tag string) (Syslogger, error) {
-	return DialLoggerTimeout(network, raddr, p, facility, tag, 0)
+	return DialLoggerWithOptions(network, raddr, p, facility, tag, DialOptions{})
 }
 
-// DialLoggerTimeout is like DialLogger but lets callers set the remote dial deadline.
-// A timeout of 0 keeps the existing 50 millisecond default.
-func DialLoggerTimeout(network, raddr string, p Priority, facility, tag string, timeout time.Duration) (Syslogger, error) {
+// DialLoggerWithOptions is like DialLogger with extra dial settings.
+func DialLoggerWithOptions(network, raddr string, p Priority, facility, tag string, opts DialOptions) (Syslogger, error) {
 	fPriority, err := facilityPriority(facility)
 	if err != nil {
 		return nil, err
@@ -47,7 +45,7 @@ func DialLoggerTimeout(network, raddr string, p Priority, facility, tag string, 
 
 	priority := syslog.Priority(p) | fPriority
 
-	l, err := dialBuiltin(network, raddr, priority, tag, timeout)
+	l, err := dialBuiltin(network, raddr, priority, tag, opts.Timeout)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,6 @@ package gsyslog
 
 import (
 	"fmt"
-	"time"
 )
 
 // NewLogger is used to construct a new Syslogger
@@ -17,9 +16,9 @@ func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 
 // DialLogger is used to construct a new Syslogger that establishes connection to remote syslog server
 func DialLogger(network, raddr string, p Priority, facility, tag string) (Syslogger, error) {
-	return DialLoggerTimeout(network, raddr, p, facility, tag, 0)
+	return DialLoggerWithOptions(network, raddr, p, facility, tag, DialOptions{})
 }
 
-func DialLoggerTimeout(network, raddr string, p Priority, facility, tag string, timeout time.Duration) (Syslogger, error) {
+func DialLoggerWithOptions(network, raddr string, p Priority, facility, tag string, opts DialOptions) (Syslogger, error) {
 	return nil, fmt.Errorf("Platform does not support syslog")
 }

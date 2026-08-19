@@ -3,6 +3,15 @@
 
 package gsyslog
 
+import "time"
+
+// DialOptions holds optional settings for DialLoggerWithOptions.
+type DialOptions struct {
+	// Timeout is the remote dial deadline. A zero value keeps the
+	// existing 50 millisecond default.
+	Timeout time.Duration
+}
+
 // Priority maps to the syslog priority levels
 type Priority int
 

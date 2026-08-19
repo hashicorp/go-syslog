@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestDialLoggerTimeoutLocal(t *testing.T) {
+func TestDialLoggerWithOptionsLocal(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +28,7 @@ func TestDialLoggerTimeoutLocal(t *testing.T) {
 		}
 	}()
 
-	l, err := DialLoggerTimeout("tcp", ln.Addr().String(), LOG_INFO, "USER", "gsyslog-test", time.Second)
+	l, err := DialLoggerWithOptions("tcp", ln.Addr().String(), LOG_INFO, "USER", "gsyslog-test", DialOptions{Timeout: time.Second})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestDialLoggerTimeoutLocal(t *testing.T) {
 	}
 }
 
-func TestDialLoggerTimeoutZeroUsesDefault(t *testing.T) {
+func TestDialLoggerZeroTimeoutUsesDefault(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
