@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2016, 2026
 // SPDX-License-Identifier: MIT
 
-// +build linux darwin dragonfly freebsd netbsd openbsd solaris
+//go:build linux || darwin || dragonfly || freebsd || netbsd || openbsd || solaris || aix
 
 package gsyslog
 
